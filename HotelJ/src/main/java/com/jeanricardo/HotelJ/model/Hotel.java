@@ -40,153 +40,15 @@ public class Hotel {
             sql = "INSERT INTO hospedes (nome,documento,telefone) VALUES (?,?,?);";
             stmt = c.prepareStatement(sql);
             stmt.setString(1, nomeHospede);
-            stmt.setInt(2, Integer.parseInt(documento));
-            stmt.setInt(3, Integer.parseInt(telefone));
+            stmt.setString(2, documento);
+            stmt.setString(3, telefone);
             stmt.executeUpdate();
         } catch (Exception e) {
-            throw new Exception("Problema na base de dados");
+            throw new Exception(e.getMessage()+"Problema na base de dados. Pode já haver hospede com estes dados");
         }
     }
 
-    public void checkIn(String nomeHospede, String documento, String telefone, boolean adicionalVeiculo) throws Exception {
-        try {
-            c = new Conexao().criarConexao();
-
-            int id = getIdHospede(nomeHospede, documento, telefone);
-
-            if (id != 0) {
-                stmt = c.prepareStatement("SELECT id FROM hospedagem WHERE hospede = ? AND dataSaida IS NULL", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-                stmt.setInt(1, id);
-                ResultSet resultado = stmt.executeQuery();
-                resultado.last();
-                int tam = resultado.getRow();
-                System.out.println("row" + tam);
-                if (tam > 0) {
-                    throw new Exception("Já existe hospedagem aberta");
-
-                }
-
-                DateTimeFormatter formato = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-                LocalDateTime dataHora = LocalDateTime.now();
-
-                String data = formato.format(dataHora);
-
-                sql = "INSERT INTO hospedagem (hospede,dataEntrada,adicionalVeiculo) VALUES (?,?,?);";
-                stmt = c.prepareStatement(sql);
-                stmt.setInt(1, id);
-                stmt.setString(2, data);
-                stmt.setBoolean(3, adicionalVeiculo);
-                stmt.executeUpdate();
-            } else {
-                throw new Exception("Não conseguiu fazer CheckIn");
-            }
-
-        } catch (Exception ex) {
-            throw new Exception(ex.getMessage());
-        }
-
-    }
-
-    public void checkOut(String nomeHospede, String documento, String telefone) {
-        try {
-            c = new Conexao().criarConexao();
-
-            int id = getIdHospede(nomeHospede, documento, telefone);
-            int idHospedagem = 0;
-            String dataEntradaStr = "";
-            boolean usaGaragem;
-            if (id != 0) {
-                stmt = c.prepareStatement("SELECT * FROM hospedagem WHERE hospede = ? AND dataSaida IS NULL", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-                stmt.setInt(1, id);
-                ResultSet resultado = stmt.executeQuery();
-
-                resultado.last();
-                int tam = resultado.getRow();
-                if (tam > 0) {
-                    resultado.first();
-                    idHospedagem = resultado.getInt("id");
-                    dataEntradaStr = resultado.getString("dataentrada");
-                    usaGaragem = resultado.getBoolean("adicionalveiculo");
-
-                    LocalDateTime inicio = LocalDateTime.parse(dataEntradaStr);
-
-                    LocalDateTime fim = LocalDateTime.now();
-
-                    int diaInicial = inicio.getDayOfWeek().getValue();
-                    int diaFinal = fim.getDayOfWeek().getValue();
-                    int doyInicio = inicio.getDayOfYear();
-                    int doyFim = fim.getDayOfYear();
-                    int diasPassados = doyFim - doyInicio + 1;
-
-                    //decide se paga diaria no ultimo dia/calendario
-                    LocalDateTime extra = LocalDateTime.of(fim.getYear(), fim.getMonth(), fim.getDayOfMonth(), 16, 30);
-                    long limiteSemExtra = extra.toEpochSecond(ZoneOffset.UTC);
-                    long millisFim = fim.toEpochSecond(ZoneOffset.UTC);
-                    boolean pagaExtra = false;
-                    if (millisFim - limiteSemExtra > 0) {
-                        pagaExtra = true;
-                    }
-
-                    int diaAtual = diaInicial;
-                    int montante = 0;
-                    System.out.println("diaspassados" + diasPassados);
-                    for (int e = 0; e < diasPassados; e++) {
-                        if (diaAtual == 8) {
-                            diaAtual = 1;
-                        }
-
-                        if (diaAtual == 6 || diaAtual == 7) {
-                            if (e == diasPassados - 1 && !pagaExtra) {
-                                break;
-                            } else {
-                                montante += 150;
-                                if (usaGaragem) {
-                                    montante += 20;
-                                }
-                            }
-                        } else {
-                            if (e == diasPassados - 1 && !pagaExtra) {
-                                break;
-                            } else {
-                                montante += 120;
-                                if (usaGaragem) {
-                                    montante += 15;
-                                }
-                            }
-                        }
-                        diaAtual++;
-                    }
-
-                    DateTimeFormatter formato = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-                    String dataFinalStr = formato.format(fim);
-
-                    sql = "UPDATE hospedagem SET dataSaida = ?, custoTotal = ? WHERE id = ?;";
-                    System.out.println("montante" + montante);
-                    System.out.println("datafin" + dataFinalStr);
-                    System.out.println("id" + id);
-                    stmt = c.prepareStatement(sql);
-                    stmt.setString(1, dataFinalStr);
-                    stmt.setFloat(2, montante);
-                    stmt.setInt(3, idHospedagem);
-                    stmt.executeUpdate();
-                    System.out.println("passouaqui");
-                    c.close();
-
-                } else {
-                    throw new Exception("Não possuem hospedagens sem checkout para este");
-                }
-
-            } else {
-                throw new Exception("Não conseguiu fazer CheckOut");
-            }
-
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-            
-        }
-        
-
-    }
+   
 
     public int getIdHospede(String nomeHospede, String documento, String telefone) {
 

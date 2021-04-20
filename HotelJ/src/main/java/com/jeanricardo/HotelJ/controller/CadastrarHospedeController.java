@@ -12,16 +12,30 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 public class CadastrarHospedeController {
-//localhost:8080/cadastrar?nome=joao&doc=8989&tel=990
+
+    /*
+    localhost:8080/cadastrar
     
-    @GetMapping("/cadastrar")
-    public ResponseEntity<String> index(@RequestParam(required = false) String nome, @RequestParam(required = false) String doc, @RequestParam(required = false) String tel) throws Exception {
+    {
+        "nome":"Fulano da Silva",
+        "documento":"123456",
+        "telefone":"9925-2211"
+    }
+     */
+
+    @PostMapping("/cadastrar")
+    public ResponseEntity<String> index(@RequestBody HospedeDTO cadastro) throws Exception {
+        String nome = cadastro.getnome();
+        String doc = cadastro.getdocumento();
+        String tel = cadastro.gettelefone();
+
         try {
             if (nome != null && doc != null && tel != null) {
                 Hotel hotel = new Hotel();
                 hotel.cadastrarHospede(nome, doc, tel);
                 return new ResponseEntity<>("Sucesso", HttpStatus.OK);
             } else {
+                
                 return new ResponseEntity<>("Dados insulficientes", HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {

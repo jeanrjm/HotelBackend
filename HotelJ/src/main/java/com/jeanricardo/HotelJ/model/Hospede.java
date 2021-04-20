@@ -152,6 +152,7 @@ public class Hospede {
                 stmt.setBoolean(4, adicionalVeiculo);
                 stmt.setFloat(5, custo);
                 stmt.executeUpdate();
+                
             } else {
                 throw new Exception("Não conseguiu fazer CheckIn");
             }
