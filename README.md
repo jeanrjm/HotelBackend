@@ -11,11 +11,27 @@ Execute usando CMD(CommandPrompter) o comando 'mvn package', especificando o mes
 Após o build execute o jar 'HotelJ-0.0.1-SNAPSHOT' encontrado na pasta target, para iniciar o servidor.
 
 ENDPOINTS 
--PARA FAZER CADASTRO DE HOSPEDE:                    localhost:8080/cadastrar?nome=joao&doc=8989&tel=990
--PARA FAZER CHECKIN:                                localhost:8080/checkin?nome=joao&doc=8989&tel=990&entrada=2021-03-28T10:23:54&saida=2021-03-31T18:23:54&veiculo=true
+-PARA FAZER CADASTRO DE HOSPEDE:                    localhost:8080/cadastrar
+                                                    {
+                                                        "nome":"Fulano da Silva",
+                                                        "documento":"123456",
+                                                        "telefone":"9925-2211"
+                                                    }
+                                                    
+-PARA FAZER CHECKIN:                                localhost:8080/checkin
+                                                      {
+                                                              "hospede": {
+                                                                  "nome":"Fulano da Silva",
+                                                                  "documento":"123456",
+                                                                  "telefone":"9925-2211"
+                                                              },
+                                                              "dataEntrada": "2018-03-14T08:00:00",
+                                                              "dataSaida": "2018-03-16T10:17:00",
+                                                              "adicionalVeiculo": "false"
+                                                       }
+
+
 -PARA CONSULTAR HOSPEDES ATUAIS:                    localhost:8080/hospedes/atuais
 -PARA CONSULTAR HOSPEDES ÑÃO HOSPEDADOS ATUALMENTE: localhost:8080/hospedes/naohospedados
 
 
-
---CADASTRO DE HOSPEDE E CHECKIN ESÃO IMPLEMENTADOS COMO METODO GET QUANDO DEVERIAM SER POST DEVIDO À PROBLEMAS USANDO POSTMAN E FALTA DE TEMPO PARA RESOLVER O PROBLEMA
